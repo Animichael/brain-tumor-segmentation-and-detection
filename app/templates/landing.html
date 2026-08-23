@@ -57,9 +57,9 @@
 <!-- ============================ HERO ============================ -->
 <section class="hero" id="home">
     <div class="hero-slider" id="hero-slider">
-        {% for slide in slides %}
+        {% for filename in slides %}
         <div class="hero-slide {% if loop.first %}is-active{% endif %}"
-             style="background-image: url('{{ url_for('static', filename='uploads/slider/' ~ slide.image_filename) }}');">
+             style="background-image: url('{{ url_for('static', filename='uploads/slider/' ~ filename) }}');">
             <div class="hero-slide-overlay"></div>
         </div>
         {% endfor %}
@@ -67,7 +67,7 @@
 
     <div class="hero-content container">
         {% if slides %}
-        <span class="eyebrow eyebrow-on-dark reveal">{{ slides[0].title }}</span>
+        <span class="eyebrow eyebrow-on-dark reveal">Advanced MRI Diagnostics</span>
         {% endif %}
         <h1 class="reveal">AI-Powered Brain Tumor Detection &amp; Segmentation</h1>
         <p class="hero-subtext reveal" style="--reveal-delay: 100ms;">

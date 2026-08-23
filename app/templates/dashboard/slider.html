@@ -3,39 +3,34 @@
 {% block dashboard_title %}Hero Slider{% endblock %}
 
 {% block dashboard_content %}
+<p class="upload-card-subtext" style="margin-bottom: 20px;">
+    These are the images currently shown in the landing page's hero slider, read directly from
+    <code>app/static/uploads/slider/</code>. To add, remove, or reorder slides, add or remove image files
+    in that folder (they're shown in filename order) and redeploy.
+</p>
 <div class="table-wrapper">
     <table>
         <thead>
             <tr>
                 <th>Image</th>
-                <th>Title</th>
-                <th>Subtitle</th>
-                <th>Order</th>
-                <th>Status</th>
+                <th>Filename</th>
             </tr>
         </thead>
         <tbody>
-            {% for slide in pagination.items %}
+            {% for filename in slides %}
             <tr>
                 <td>
-                    <img class="table-thumb" alt="{{ slide.title }}"
-                         src="{{ url_for('static', filename='uploads/slider/' ~ slide.image_filename) }}">
+                    <img class="table-thumb" alt="{{ filename }}"
+                         src="{{ url_for('static', filename='uploads/slider/' ~ filename) }}">
                 </td>
-                <td>{{ slide.title }}</td>
-                <td>{{ slide.subtitle or '—' }}</td>
-                <td>{{ slide.sort_order }}</td>
-                <td>
-                    <span class="status-dot {{ 'status-processed' if slide.is_active else 'status-pending' }}"></span>
-                    {{ 'Active' if slide.is_active else 'Hidden' }}
-                </td>
+                <td>{{ filename }}</td>
             </tr>
             {% else %}
             <tr>
-                <td colspan="5" class="dashboard-empty-text">No slides yet.</td>
+                <td colspan="2" class="dashboard-empty-text">No slides yet.</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
-    {% include "dashboard/_pagination.html" %}
 </div>
 {% endblock %}

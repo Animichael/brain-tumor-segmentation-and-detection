@@ -1,9 +1,29 @@
 """Landing page routes."""
-from flask import Blueprint, render_template
+import os
 
-from app.models import Patient, Prediction, Scan, SliderImage, Testimonial
+from flask import Blueprint, current_app, render_template
+
+from app.models import Patient, Prediction, Scan, Testimonial
 
 main_bp = Blueprint("main", __name__)
+
+HERO_SLIDE_EXTENSIONS = {".jpg", ".jpeg", ".png"}
+
+
+def _hero_slides():
+    """Hero slider images, read directly from disk rather than the
+    database - these are static marketing assets shipped with the repo, not
+    user-generated content, so there's nothing a database row adds here
+    except another thing that can be out of sync with what's actually on
+    disk (or empty, on a fresh/unseeded database)."""
+    upload_dir = current_app.config["UPLOAD_FOLDER_SLIDER"]
+    if not os.path.isdir(upload_dir):
+        return []
+    return sorted(
+        filename
+        for filename in os.listdir(upload_dir)
+        if os.path.splitext(filename)[1].lower() in HERO_SLIDE_EXTENSIONS
+    )
 
 HOW_IT_WORKS = [
     {
@@ -49,11 +69,7 @@ FEATURES = [
 
 @main_bp.route("/")
 def index():
-    slides = (
-        SliderImage.query.filter_by(is_active=True)
-        .order_by(SliderImage.sort_order.asc())
-        .all()
-    )
+    slides = _hero_slides()
     testimonials = Testimonial.query.all()
     stats = [
         {"icon": "scan-24-regular", "value": str(Scan.query.count()), "label": "Scans Analyzed"},

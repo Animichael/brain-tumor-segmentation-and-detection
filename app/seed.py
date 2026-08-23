@@ -1,30 +1,11 @@
-"""One-time database seeding: admin user, hero slider images, testimonials,
-and sample patients/scans/predictions so the dashboard has real records to
-render before the ML pipeline and CMS forms are built out in later steps.
+"""One-time database seeding: admin user, testimonials, and sample
+patients/scans/predictions so the dashboard has real records to render.
+
+Hero slider images are not seeded here - they're read directly from
+app/static/uploads/slider/ at request time (see app/routes/main.py).
 """
 from app import db
-from app.models import Patient, Prediction, Scan, SliderImage, Testimonial, User
-
-SLIDES = [
-    {
-        "title": "Advanced MRI Diagnostics",
-        "subtitle": "State-of-the-art imaging technology for early, accurate brain tumor detection.",
-        "image_filename": "slide-1-mri-machine.jpg",
-        "sort_order": 1,
-    },
-    {
-        "title": "Precision-Guided Neurosurgery",
-        "subtitle": "Expert surgical teams supported by AI-assisted tumor localization.",
-        "image_filename": "slide-2-surgical-team.jpg",
-        "sort_order": 2,
-    },
-    {
-        "title": "AI-Powered Tumor Segmentation",
-        "subtitle": "Deep learning models trained to classify and segment brain scans in seconds.",
-        "image_filename": "slide-3-brain-scan.jpg",
-        "sort_order": 3,
-    },
-]
+from app.models import Patient, Prediction, Scan, Testimonial, User
 
 TESTIMONIALS = [
     {
@@ -86,9 +67,6 @@ def seed_database():
     db.session.add(admin)
     db.session.flush()  # assign admin.id before it's referenced as a foreign key
 
-    for slide in SLIDES:
-        db.session.add(SliderImage(is_active=True, **slide))
-
     for testimonial in TESTIMONIALS:
         db.session.add(Testimonial(**testimonial))
 
@@ -123,4 +101,4 @@ def seed_database():
             )
 
     db.session.commit()
-    print("Database seeded: 1 admin, 3 slides, 4 testimonials, 4 patients, 5 scans, 4 predictions.")
+    print("Database seeded: 1 admin, 4 testimonials, 4 patients, 5 scans, 4 predictions.")

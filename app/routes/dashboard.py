@@ -8,7 +8,8 @@ from flask_login import current_user, login_required
 from app import db
 from app.decorators import admin_required
 from app.forms import DeleteForm, ProfileForm, ScanUploadForm
-from app.models import Patient, Prediction, Scan, SliderImage, User
+from app.models import Patient, Prediction, Scan, User
+from app.routes.main import _hero_slides
 
 dashboard_bp = Blueprint("dashboard", __name__, url_prefix="/dashboard")
 
@@ -159,11 +160,8 @@ def delete_result(prediction_id):
 @login_required
 @admin_required
 def slider():
-    page = request.args.get("page", 1, type=int)
-    pagination = SliderImage.query.order_by(SliderImage.sort_order.asc()).paginate(
-        page=page, per_page=PER_PAGE, error_out=False
-    )
-    return render_template("dashboard/slider.html", pagination=pagination)
+    slides = _hero_slides()
+    return render_template("dashboard/slider.html", slides=slides)
 
 
 @dashboard_bp.route("/profile", methods=["GET", "POST"])
