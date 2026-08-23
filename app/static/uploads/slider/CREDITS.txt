@@ -1,0 +1,18 @@
+Hero slider placeholder images — sourced from Wikimedia Commons.
+
+slide-1-mri-machine.jpg
+  "Helmand's largest hospital introduces new MRI capabilities 111015-M-DF801-043.jpg"
+  License: Public domain (US military photo)
+  https://commons.wikimedia.org/wiki/File:Helmand%E2%80%99s_largest_hospital_introduces_new_MRI_capabilities_111015-M-DF801-043.jpg
+
+slide-2-surgical-team.jpg (cropped to remove the surgical site, showing only the team)
+  "Surgeons in the operating room.jpg"
+  License: Public domain
+  https://commons.wikimedia.org/wiki/File:Surgeons_in_the_operating_room.jpg
+
+slide-3-brain-scan.jpg
+  "MRI Brain ADC Axial (1).jpg"
+  License: CC BY-SA 4.0 — attribution required if used beyond this local demo/dataset context.
+  https://commons.wikimedia.org/wiki/File:MRI_Brain_ADC_Axial_(1).jpg
+
+Replace these with your own licensed hospital/marketing photography before any production deployment.

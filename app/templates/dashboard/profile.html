@@ -1,0 +1,91 @@
+{% extends "dashboard/base_dashboard.html" %}
+
+{% block dashboard_title %}Profile{% endblock %}
+
+{% block dashboard_content %}
+<div class="card profile-card">
+    {% if current_user.avatar %}
+    <img src="{{ url_for('static', filename=current_user.avatar) }}" alt="{{ current_user.full_name }}" class="profile-avatar">
+    {% else %}
+    <span class="avatar-icon profile-avatar">{{ icon('person-circle-24-filled') }}</span>
+    {% endif %}
+
+    <h2>{{ current_user.full_name }}</h2>
+    <p class="profile-role">{{ current_user.role|capitalize }}</p>
+
+    <dl class="profile-details">
+        <div class="profile-detail-row">
+            <dt>{{ icon('mail-20-regular') }} Email</dt>
+            <dd>{{ current_user.email }}</dd>
+        </div>
+        <div class="profile-detail-row">
+            <dt>{{ icon('clock-20-regular') }} Member since</dt>
+            <dd>{{ current_user.created_at.strftime('%B %d, %Y') }}</dd>
+        </div>
+    </dl>
+</div>
+
+<div class="card profile-form-card">
+    <h3 class="dashboard-section-title">Account Settings</h3>
+    <p class="upload-card-subtext">Update your name or email, and set a new password if you'd like. Your current password is required to save any change.</p>
+
+    <form method="POST" class="profile-form">
+        {{ form.hidden_tag() }}
+
+        <div class="grid grid-cols-2 patient-fields-grid">
+            <div class="form-group">
+                <label class="form-label" for="{{ form.full_name.id }}">Full Name</label>
+                <div class="input-icon-group">
+                    {{ icon('person-24-regular', 'input-icon') }}
+                    {{ form.full_name(class_="form-control", placeholder="e.g. Jane Doe") }}
+                </div>
+                {% for error in form.full_name.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="{{ form.email.id }}">Email</label>
+                <div class="input-icon-group">
+                    {{ icon('mail-24-regular', 'input-icon') }}
+                    {{ form.email(class_="form-control", placeholder="you@example.com") }}
+                </div>
+                {% for error in form.email.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+            </div>
+        </div>
+
+        <h4 class="upload-form-subheading">Change Password</h4>
+        <div class="grid grid-cols-2 patient-fields-grid">
+            <div class="form-group">
+                <label class="form-label" for="{{ form.new_password.id }}">New Password</label>
+                <div class="input-icon-group">
+                    {{ icon('lock-closed-24-regular', 'input-icon') }}
+                    {{ form.new_password(class_="form-control", placeholder="Leave blank to keep current password") }}
+                </div>
+                {% for error in form.new_password.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="{{ form.confirm_new_password.id }}">Confirm New Password</label>
+                <div class="input-icon-group">
+                    {{ icon('lock-closed-24-regular', 'input-icon') }}
+                    {{ form.confirm_new_password(class_="form-control", placeholder="Repeat new password") }}
+                </div>
+                {% for error in form.confirm_new_password.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+            </div>
+        </div>
+
+        <h4 class="upload-form-subheading">Confirm It's You</h4>
+        <div class="form-group profile-current-password-group">
+            <label class="form-label" for="{{ form.current_password.id }}">Current Password <span class="required-mark">*</span></label>
+            <div class="input-icon-group">
+                {{ icon('shield-lock-24-regular', 'input-icon') }}
+                {{ form.current_password(class_="form-control", placeholder="Enter your current password") }}
+            </div>
+            {% for error in form.current_password.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+        </div>
+
+        <div class="upload-submit-row">
+            {{ form.submit(class_="btn btn-primary upload-submit-btn") }}
+        </div>
+    </form>
+</div>
+{% endblock %}

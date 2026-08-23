@@ -1,0 +1,63 @@
+{% extends "dashboard/base_dashboard.html" %}
+
+{% block dashboard_title %}Results{% endblock %}
+
+{% block dashboard_content %}
+<div class="table-wrapper">
+    <table>
+        <thead>
+            <tr>
+                <th>Scan</th>
+                <th>Patient</th>
+                <th>Age</th>
+                <th>Gender</th>
+                <th>Phone</th>
+                <th>Address</th>
+                <th>Classification</th>
+                <th>Confidence</th>
+                <th>Tumor Area</th>
+                <th>Sequence</th>
+                <th>Date</th>
+                <th class="table-actions-col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for prediction in pagination.items %}
+            <tr>
+                <td>
+                    <img class="table-thumb"
+                         alt="Segmentation for scan {{ prediction.scan_id }}"
+                         src="{{ url_for('static', filename='uploads/scans/' ~ (prediction.scan.segmented_filename or prediction.scan.image_filename)) }}">
+                </td>
+                <td>{{ prediction.scan.patient.name }}</td>
+                <td>{{ prediction.scan.patient.age }}</td>
+                <td>{{ prediction.scan.patient.gender }}</td>
+                <td>{{ prediction.scan.patient.phone or '—' }}</td>
+                <td>{{ prediction.scan.patient.address or '—' }}</td>
+                <td>{{ prediction.classification }}</td>
+                <td>{{ "%.0f"|format(prediction.confidence * 100) }}%</td>
+                <td>{{ "%.1f"|format(prediction.tumor_area_percent) if prediction.tumor_area_percent is not none else '—' }}%</td>
+                <td>{{ prediction.sequence_type or '—' }}</td>
+                <td>{{ prediction.created_at.strftime('%b %d, %Y') }}</td>
+                <td class="table-actions-col">
+                    <form method="POST"
+                          action="{{ url_for('dashboard.delete_result', prediction_id=prediction.id, page=pagination.page) }}"
+                          class="delete-result-form"
+                          data-confirm-name="{{ prediction.scan.patient.name }}">
+                        {{ delete_form.hidden_tag() }}
+                        <button type="submit" class="delete-btn" aria-label="Delete result for {{ prediction.scan.patient.name }}">
+                            {{ icon('delete-24-regular') }}
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="12" class="dashboard-empty-text">No results yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% include "dashboard/_pagination.html" %}
+</div>
+{% endblock %}

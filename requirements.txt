@@ -1,0 +1,26 @@
+# PyTorch's CPU-only wheel index — keeps the install small and avoids
+# pulling unused CUDA libraries on Render's CPU-only instances.
+--extra-index-url https://download.pytorch.org/whl/cpu
+
+# --- Web app ---------------------------------------------------------------
+Flask==3.1.3
+Flask-SQLAlchemy==3.1.1
+Flask-Login==0.6.3
+Flask-WTF==1.3.0
+email-validator==2.3.0
+Werkzeug==3.1.8
+gunicorn==26.1.0
+
+# --- Database ----------------------------------------------------------------
+# Only required when DATABASE_URL points at Postgres (e.g. on Render); the
+# app falls back to SQLite locally, where this package simply sits unused.
+psycopg2-binary==2.9.12
+
+# --- ML / inference ----------------------------------------------------------
+numpy<2
+pillow==12.3.0
+matplotlib==3.11.1
+torch==2.2.2
+transformers<5
+huggingface_hub==0.36.2
+ultralytics==8.4.126

@@ -1,0 +1,16 @@
+{# Server-side pagination controls. Expects `pagination` (a Flask-SQLAlchemy Pagination) in context. #}
+{% if pagination.pages > 1 %}
+<div class="table-pagination">
+    <span class="pagination-info">Page {{ pagination.page }} of {{ pagination.pages }} · {{ pagination.total }} total</span>
+    <div class="pagination-controls">
+        <a href="{{ url_for(request.endpoint, page=pagination.prev_num) if pagination.has_prev else '#' }}"
+           class="pagination-btn {% if not pagination.has_prev %}is-disabled{% endif %}" aria-label="Previous page">
+            {{ icon('chevron-left-24-regular') }}
+        </a>
+        <a href="{{ url_for(request.endpoint, page=pagination.next_num) if pagination.has_next else '#' }}"
+           class="pagination-btn {% if not pagination.has_next %}is-disabled{% endif %}" aria-label="Next page">
+            {{ icon('chevron-right-24-regular') }}
+        </a>
+    </div>
+</div>
+{% endif %}

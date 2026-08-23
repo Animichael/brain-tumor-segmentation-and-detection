@@ -1,0 +1,154 @@
+/* ==========================================================================
+   Authentication pages (login / register)
+   Split layout: decorative green visual panel + a clean form card.
+   ========================================================================== */
+
+.auth-page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+/* ---- Left visual panel ---------------------------------------------------- */
+.auth-visual {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--color-primary);
+  background-image: url('../img/auth/doctor-login.jpg');
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+}
+
+.auth-visual-content {
+  position: relative;
+  z-index: 2;
+  max-width: 420px;
+  text-align: center;
+  color: #fff;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.55);
+}
+
+.auth-logo {
+  justify-content: center;
+  color: #fff;
+  font-size: 1.4rem;
+}
+
+.auth-logo:hover {
+  color: #fff;
+  opacity: 0.85;
+}
+
+/* ---- Right form panel ------------------------------------------------------ */
+.auth-panel {
+  background-color: var(--color-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+}
+
+.auth-card {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  padding: 44px;
+}
+
+.auth-theme-toggle {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.auth-card h2 {
+  margin-bottom: 28px;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.input-icon-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 14px;
+  font-size: 18px;
+  color: var(--color-text-muted);
+  pointer-events: none;
+  transition: color 0.3s ease;
+  z-index: 1;
+}
+
+.input-icon-group .form-control {
+  /* Beats the global input:not(...) reset in style.css, whose chained
+     :not() clauses outrank this two-class selector on specificity alone. */
+  padding-left: 48px !important;
+}
+
+.input-icon-group:focus-within .input-icon {
+  color: var(--color-primary);
+}
+
+.field-error {
+  display: block;
+  color: var(--color-danger);
+  font-size: 0.9rem;
+  margin-top: 6px;
+}
+
+.auth-switch {
+  text-align: center;
+  margin-top: 24px;
+  color: var(--color-text-muted);
+}
+
+.auth-switch a {
+  font-weight: 600;
+}
+
+/* ---- Responsive: stack panels on smaller screens --------------------------- */
+@media (max-width: 900px) {
+  .auth-page {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-visual {
+    min-height: 240px;
+    padding: 32px 24px;
+  }
+
+  .auth-logo {
+    margin-bottom: 20px;
+  }
+
+  .auth-visual-content h1 {
+    font-size: 1.6rem;
+  }
+
+  .auth-visual-content p {
+    font-size: 1rem;
+  }
+
+  .auth-card {
+    padding: 32px 24px;
+  }
+}
+
+@media (max-width: 420px) {
+  .auth-card {
+    padding: 28px 18px;
+  }
+}

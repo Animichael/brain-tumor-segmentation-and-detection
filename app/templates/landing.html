@@ -1,0 +1,333 @@
+{% extends "base.html" %}
+
+{% block title %}NeuroScan AI — Brain Tumor Detection & Segmentation{% endblock %}
+
+{% block content %}
+
+<!-- ============================ NAVBAR ============================ -->
+<header class="navbar" id="site-navbar">
+    <div class="container navbar-inner">
+        <a href="{{ url_for('main.index') }}" class="navbar-logo">
+            {{ icon('brain-circuit-24-regular') }}
+            <span>NeuroScan <strong>AI</strong></span>
+        </a>
+
+        <nav class="navbar-links">
+            <a href="#home">Home</a>
+            <a href="#how-it-works">How It Works</a>
+            <a href="#features">Why Choose Us</a>
+            <a href="#about">About</a>
+            <a href="#testimonials">Testimonials</a>
+            <a href="#contact">Contact</a>
+        </nav>
+
+        <div class="navbar-actions">
+            <button class="theme-toggle" data-theme-toggle aria-label="Toggle dark mode" aria-pressed="false">
+                {{ icon('weather-sunny-20-regular', 'icon-sun') }}
+                {{ icon('weather-moon-20-regular', 'icon-moon') }}
+            </button>
+            <a href="{{ url_for('auth.login') }}" class="btn btn-outline btn-sm navbar-only-wide">{{ icon('arrow-enter-20-regular') }} Login</a>
+            <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-sm navbar-only-wide">{{ icon('person-add-20-regular') }} Register</a>
+            <button class="navbar-burger" id="navbar-burger" aria-label="Open menu" aria-expanded="false">
+                {{ icon('line-horizontal-3-24-regular') }}
+            </button>
+        </div>
+    </div>
+</header>
+
+<div class="navbar-mobile" id="navbar-mobile">
+    <button class="navbar-mobile-close" id="navbar-mobile-close" aria-label="Close menu">
+        {{ icon('dismiss-24-regular') }}
+    </button>
+    <nav class="navbar-mobile-links">
+        <a href="#home">Home</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="#features">Why Choose Us</a>
+        <a href="#about">About</a>
+        <a href="#testimonials">Testimonials</a>
+        <a href="#contact">Contact</a>
+    </nav>
+    <div class="navbar-mobile-actions">
+        <a href="{{ url_for('auth.login') }}" class="btn btn-outline">{{ icon('arrow-enter-20-regular') }} Login</a>
+        <a href="{{ url_for('auth.register') }}" class="btn btn-primary">{{ icon('person-add-20-regular') }} Register</a>
+    </div>
+</div>
+<div class="navbar-mobile-backdrop" id="navbar-mobile-backdrop"></div>
+
+<!-- ============================ HERO ============================ -->
+<section class="hero" id="home">
+    <div class="hero-slider" id="hero-slider">
+        {% for slide in slides %}
+        <div class="hero-slide {% if loop.first %}is-active{% endif %}"
+             style="background-image: url('{{ url_for('static', filename='uploads/slider/' ~ slide.image_filename) }}');">
+            <div class="hero-slide-overlay"></div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="hero-content container">
+        {% if slides %}
+        <span class="eyebrow eyebrow-on-dark reveal">{{ slides[0].title }}</span>
+        {% endif %}
+        <h1 class="reveal">AI-Powered Brain Tumor Detection &amp; Segmentation</h1>
+        <p class="hero-subtext reveal" style="--reveal-delay: 100ms;">
+            Combining U-Net segmentation and ResNet50 classification to help clinical teams
+            identify, localize, and understand brain tumors faster.
+        </p>
+        <div class="hero-cta reveal" style="--reveal-delay: 200ms;">
+            <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Get Started</a>
+            <a href="#how-it-works" class="btn btn-outline btn-on-dark">See How It Works</a>
+        </div>
+    </div>
+
+    {% if slides|length > 1 %}
+    <button class="hero-arrow hero-arrow-prev" id="hero-prev" aria-label="Previous slide">
+        {{ icon('arrow-left-24-regular') }}
+    </button>
+    <button class="hero-arrow hero-arrow-next" id="hero-next" aria-label="Next slide">
+        {{ icon('arrow-right-24-regular') }}
+    </button>
+    <div class="hero-dots" id="hero-dots">
+        {% for slide in slides %}
+        <button class="hero-dot {% if loop.first %}is-active{% endif %}" data-slide-index="{{ loop.index0 }}"
+                aria-label="Go to slide {{ loop.index }}"></button>
+        {% endfor %}
+    </div>
+    {% endif %}
+</section>
+
+<div class="container">
+    <div class="quick-actions-card card reveal">
+        <div class="quick-action">
+            {{ icon('map-pin-20-regular') }}
+            <div>
+                <span class="quick-action-label">Location</span>
+                <span class="quick-action-value">Find a Center</span>
+            </div>
+        </div>
+        <div class="quick-action-divider"></div>
+        <div class="quick-action">
+            {{ icon('alert-20-regular') }}
+            <div>
+                <span class="quick-action-label">Emergency</span>
+                <span class="quick-action-value">+1 (800) 555-0110</span>
+            </div>
+        </div>
+        <div class="quick-action-divider"></div>
+        <div class="quick-action">
+            {{ icon('calendar-checkmark-20-regular') }}
+            <div>
+                <span class="quick-action-label">Book Scan</span>
+                <span class="quick-action-value">Schedule Now</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================ STATS ============================ -->
+<section class="stats-section">
+    <div class="container grid grid-cols-3" data-reveal-group>
+        {% for stat in stats %}
+        <div class="stat-card reveal">
+            <div class="stat-icon">{{ icon(stat.icon) }}</div>
+            <span class="stat-value">{{ stat.value }}</span>
+            <span class="stat-label">{{ stat.label }}</span>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- ============================ HOW IT WORKS ============================ -->
+<section class="section" id="how-it-works">
+    <div class="container">
+        <div class="section-heading reveal">
+            <span class="eyebrow">How It Works</span>
+            <h2>From MRI Upload to Clinical Insight in Four Steps</h2>
+            <p>A straightforward workflow that takes a scan from upload to a reviewable AI result.</p>
+        </div>
+
+        <div class="steps-carousel">
+            <button class="carousel-arrow carousel-arrow-prev" id="steps-prev" aria-label="Previous step">
+                {{ icon('arrow-left-24-regular') }}
+            </button>
+
+            <div class="steps-track" id="steps-track">
+                {% for step in how_it_works %}
+                <div class="step-card reveal {% if loop.index0 == 1 %}is-center{% endif %}">
+                    <div class="step-icon">{{ icon(step.icon) }}</div>
+                    <h3>{{ step.title }}</h3>
+                    <p>{{ step.description }}</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <button class="carousel-arrow carousel-arrow-next" id="steps-next" aria-label="Next step">
+                {{ icon('arrow-right-24-regular') }}
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- ============================ WHY CHOOSE US ============================ -->
+<section class="section section-tint" id="features">
+    <div class="container">
+        <div class="section-heading reveal">
+            <span class="eyebrow">Why Choose Us</span>
+            <h2>Built to Fit Real Diagnostic Workflows</h2>
+        </div>
+
+        <div class="grid grid-cols-3" data-reveal-group>
+            {% for feature in features %}
+            <div class="card feature-card reveal">
+                <div class="feature-icon">{{ icon(feature.icon) }}</div>
+                <h3>{{ feature.title }}</h3>
+                <p>{{ feature.description }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- ============================ ABOUT US ============================ -->
+<section class="section" id="about">
+    <div class="container about-grid">
+        <div class="about-collage reveal reveal-left">
+            <img src="{{ url_for('static', filename='uploads/slider/hero_6.jpeg') }}"
+                 alt="MRI scanner suite" class="about-img about-img-main">
+        </div>
+        <div class="about-text reveal reveal-right">
+            <span class="eyebrow">About Us</span>
+            <h2 class="about-title">Deep Learning Built for Radiology Workflows</h2>
+            <p>
+                Our platform pairs a U-Net segmentation network, trained to trace tumor boundaries at
+                the pixel level, with a ResNet50 classifier that distinguishes glioma, meningioma,
+                and pituitary tumors from healthy tissue. Together they give clinicians both a precise
+                boundary and a confident diagnosis in the time it takes to review a single slice.
+            </p>
+            <ul class="about-list">
+                <li>{{ icon('checkmark-circle-20-filled') }} Pixel-level tumor segmentation with U-Net</li>
+                <li>{{ icon('checkmark-circle-20-filled') }} Four-class ResNet50 classification with confidence scoring</li>
+                <li>{{ icon('checkmark-circle-20-filled') }} Results delivered directly into the clinician dashboard</li>
+            </ul>
+            <a href="#contact" class="btn btn-primary">Read More</a>
+        </div>
+    </div>
+</section>
+
+<!-- ============================ TESTIMONIALS ============================ -->
+<section class="section section-tint" id="testimonials">
+    <div class="container">
+        <div class="section-heading reveal">
+            <span class="eyebrow">Testimonials</span>
+            <h2>What People Say About Us</h2>
+        </div>
+
+        <div class="testimonials-slider">
+            <div class="testimonials-track" id="testimonials-track">
+                {% for t in testimonials %}
+                <div class="card testimonial-card reveal">
+                    <div class="testimonial-rating">
+                        {% for _ in range(t.rating) %}{{ icon('star-20-filled', 'icon-star') }}{% endfor %}
+                    </div>
+                    <p class="testimonial-message">&ldquo;{{ t.message }}&rdquo;</p>
+                    <div class="testimonial-author">
+                        {% if t.avatar %}
+                        <img src="{{ url_for('static', filename=t.avatar) }}" alt="{{ t.name }}">
+                        {% else %}
+                        <span class="avatar-fallback">{{ t.name[0] }}</span>
+                        {% endif %}
+                        <div>
+                            <strong>{{ t.name }}</strong>
+                            <span>{{ t.role }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            {% if testimonials|length > 1 %}
+            <div class="testimonials-dots" id="testimonials-dots">
+                {% for t in testimonials %}
+                <button class="testimonial-dot {% if loop.first %}is-active{% endif %}" data-index="{{ loop.index0 }}"
+                        aria-label="Go to testimonial {{ loop.index }}"></button>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- ============================ CONTACT ============================ -->
+<section class="section" id="contact">
+    <div class="container contact-grid">
+        <div class="contact-info reveal reveal-left">
+            <span class="eyebrow">Contact</span>
+            <h2>Get in Touch</h2>
+            <p>Have a question about a referral, a scan, or partnering with our research team?
+               Reach out — we typically respond within one business day.</p>
+            <ul class="contact-list">
+                <li>{{ icon('map-pin-20-regular') }} 128 Neuroscience Ave, Bristol, UK</li>
+                <li>{{ icon('call-20-regular') }} +1 (800) 555-0110</li>
+                <li>{{ icon('mail-20-regular') }} contact@neuroscan.ai</li>
+                <li>{{ icon('clock-20-regular') }} Mon–Fri, 8:00–18:00</li>
+            </ul>
+        </div>
+        <div class="contact-map reveal reveal-right">
+            <iframe
+                title="Clinic location map"
+                src="https://www.openstreetmap.org/export/embed.html?bbox=-2.6067%2C51.4400%2C-2.5567%2C51.4700&amp;layer=mapnik"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+    </div>
+</section>
+
+<!-- ============================ FOOTER ============================ -->
+<footer class="footer">
+    <div class="container footer-grid">
+        <div class="footer-brand">
+            <div class="navbar-logo">
+                {{ icon('brain-circuit-24-regular') }}
+                <span>NeuroScan <strong>AI</strong></span>
+            </div>
+            <p>128 Neuroscience Ave<br>Bristol, UK</p>
+        </div>
+
+        <div class="footer-col">
+            <h4>Quick Links</h4>
+            <a href="#home">Home</a>
+            <a href="#how-it-works">How It Works</a>
+            <a href="#features">Why Choose Us</a>
+            <a href="#about">About</a>
+        </div>
+
+        <div class="footer-col">
+            <h4>Legal</h4>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+            <a href="#">Cookie Policy</a>
+        </div>
+
+        <div class="footer-col">
+            <h4>Follow Us</h4>
+            <div class="social-links">
+                <a href="#" aria-label="Facebook">{{ icon('chat-20-regular') }}</a>
+                <a href="#" aria-label="Twitter">{{ icon('megaphone-20-regular') }}</a>
+                <a href="#" aria-label="Instagram">{{ icon('camera-20-regular') }}</a>
+                <a href="#" aria-label="LinkedIn">{{ icon('people-community-20-regular') }}</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <div class="container">
+            <p>&copy; {{ current_year }} NeuroScan AI. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,144 @@
+{% extends "dashboard/base_dashboard.html" %}
+
+{% block dashboard_title %}Scans{% endblock %}
+
+{% block dashboard_content %}
+<div class="card upload-card">
+    <h3 class="upload-card-title">
+        {{ icon('person-add-24-filled', 'upload-card-title-icon') }}
+        New Patient
+    </h3>
+
+    <form method="POST" action="{{ url_for('ml.upload') }}" enctype="multipart/form-data" id="scan-upload-form" class="upload-form">
+        {{ upload_form.hidden_tag() }}
+
+        <h4 class="upload-form-subheading">Patient Details</h4>
+        <div class="grid grid-cols-2 patient-fields-grid">
+            <div class="form-group">
+                <label class="form-label" for="{{ upload_form.patient_name.id }}">Full Name <span class="required-mark">*</span></label>
+                <div class="input-icon-group">
+                    {{ icon('person-24-regular', 'input-icon') }}
+                    {{ upload_form.patient_name(class_="form-control", placeholder="e.g. Jane Doe") }}
+                </div>
+                {% for error in upload_form.patient_name.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="{{ upload_form.patient_age.id }}">Age <span class="required-mark">*</span></label>
+                <div class="input-icon-group">
+                    {{ icon('number-symbol-24-regular', 'input-icon') }}
+                    {{ upload_form.patient_age(class_="form-control", placeholder="e.g. 45") }}
+                </div>
+                {% for error in upload_form.patient_age.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="{{ upload_form.patient_gender.id }}">Gender <span class="required-mark">*</span></label>
+                <div class="input-icon-group">
+                    {{ icon('person-accounts-24-regular', 'input-icon') }}
+                    {{ upload_form.patient_gender(class_="form-control") }}
+                </div>
+                {% for error in upload_form.patient_gender.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="{{ upload_form.patient_phone.id }}">Phone Number</label>
+                <div class="input-icon-group">
+                    {{ icon('call-24-regular', 'input-icon') }}
+                    {{ upload_form.patient_phone(class_="form-control", placeholder="e.g. +1 (555) 000-0000") }}
+                </div>
+                {% for error in upload_form.patient_phone.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+            </div>
+
+            <div class="form-group patient-address-group">
+                <label class="form-label" for="{{ upload_form.patient_address.id }}">Address</label>
+                <div class="input-icon-group">
+                    {{ icon('location-24-regular', 'input-icon') }}
+                    {{ upload_form.patient_address(class_="form-control", placeholder="e.g. 123 Main St, Springfield") }}
+                </div>
+                {% for error in upload_form.patient_address.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+            </div>
+        </div>
+
+        <h4 class="upload-form-subheading">MRI Scan <span class="required-mark">*</span></h4>
+        <label for="scan_image" class="dropzone" id="scan-dropzone">
+            {{ upload_form.scan_image(id="scan_image", class_="dropzone-input", accept=".png,.jpg,.jpeg") }}
+            <div class="dropzone-content" id="dropzone-content">
+                {{ icon('arrow-upload-24-regular', 'dropzone-icon') }}
+                <span class="dropzone-title">Click to upload or drag an MRI image here</span>
+                <span class="dropzone-hint">PNG or JPG, up to 16MB</span>
+            </div>
+            <div class="dropzone-preview" id="dropzone-preview" hidden>
+                <img id="dropzone-preview-img" alt="Selected scan preview">
+                <div class="dropzone-preview-info">
+                    <span id="dropzone-filename" class="dropzone-filename"></span>
+                    <button type="button" id="dropzone-clear" class="dropzone-clear" aria-label="Remove selected file">
+                        {{ icon('dismiss-circle-20-regular') }}
+                    </button>
+                </div>
+            </div>
+            <div class="dropzone-scanning" id="dropzone-scanning" hidden>
+                {{ icon('arrow-clockwise-24-regular', 'dropzone-scanning-spinner') }}
+                <span>Scanning image…</span>
+            </div>
+        </label>
+        {% for error in upload_form.scan_image.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+
+        <div class="upload-submit-row">
+            <button type="submit" class="btn btn-primary upload-submit-btn" id="scan-upload-submit">
+                {{ icon('wand-24-filled') }}
+                <span>Analyze Scan</span>
+            </button>
+        </div>
+    </form>
+</div>
+
+{% if latest_scan %}
+<div class="card result-card">
+    <h3 class="dashboard-section-title">Latest Scan Result</h3>
+    <div class="result-layout">
+        <img class="result-image"
+             src="{{ url_for('static', filename='uploads/scans/' ~ (latest_scan.segmented_filename or latest_scan.image_filename)) }}"
+             alt="Latest scan for {{ latest_scan.patient.name }}">
+        <div class="result-details">
+            <span class="result-patient-name">{{ latest_scan.patient.name }}</span>
+            <span class="result-patient-meta">
+                {{ latest_scan.patient.age }} yrs · {{ latest_scan.patient.gender }}
+                {% if latest_scan.patient.phone %} · {{ latest_scan.patient.phone }}{% endif %}
+            </span>
+
+            {% if latest_scan.prediction %}
+                {% set is_clear = latest_scan.prediction.classification == 'No Tumor' %}
+                <div class="result-outcome {{ 'result-outcome-clear' if is_clear else 'result-outcome-alert' }}">
+                    <span class="result-outcome-icon">
+                        {{ icon('checkmark-circle-24-filled' if is_clear else 'error-circle-24-filled') }}
+                    </span>
+                    <div>
+                        <span class="result-outcome-title">
+                            {{ 'No Tumor Detected' if is_clear else latest_scan.prediction.classification + ' Detected' }}
+                        </span>
+                        <span class="result-outcome-confidence">{{ "%.0f"|format(latest_scan.prediction.confidence * 100) }}% confidence</span>
+                    </div>
+                </div>
+                {% if latest_scan.prediction.sequence_type %}
+                <div class="result-sequence">
+                    {{ icon('pulse-24-regular') }}
+                    <span>Sequence: <strong>{{ latest_scan.prediction.sequence_type }}</strong> <em>(estimated)</em></span>
+                </div>
+                {% endif %}
+            {% else %}
+                <div class="result-outcome result-outcome-pending">
+                    <span class="result-outcome-icon">{{ icon('info-24-filled') }}</span>
+                    <span class="result-outcome-title">Analysis pending</span>
+                </div>
+            {% endif %}
+
+            <a href="{{ url_for('dashboard.results') }}" class="btn btn-primary result-view-link">
+                <span>View Results</span>
+                {{ icon('arrow-right-24-regular') }}
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

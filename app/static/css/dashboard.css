@@ -1,0 +1,1119 @@
+/* ==========================================================================
+   Dashboard shell: sidebar, header, and shared page components.
+   ========================================================================== */
+
+:root {
+  --sidebar-width: 260px;
+  --sidebar-collapsed-width: 84px;
+  --sidebar-bg: #12151a;
+  --sidebar-text: rgba(255, 255, 255, 0.72);
+  --sidebar-hover-bg: rgba(255, 255, 255, 0.08);
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+}
+
+.dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--color-bg);
+}
+
+/* ---- Sidebar ---------------------------------------------------------------
+   Intentionally a fixed dark surface regardless of light/dark app theme
+   (matches the reference design and is inherently dark-mode compatible). */
+.sidebar {
+  width: var(--sidebar-width);
+  flex-shrink: 0;
+  background-color: var(--sidebar-bg);
+  display: flex;
+  flex-direction: column;
+  padding: 20px 16px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: width 0.3s ease;
+  z-index: 1200;
+}
+
+html.sidebar-collapsed .sidebar {
+  width: var(--sidebar-collapsed-width);
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 8px 24px;
+  transition: all 0.3s ease;
+}
+
+html.sidebar-collapsed .sidebar-header {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 4px 0 20px;
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.15rem;
+  overflow: hidden;
+}
+
+.sidebar-logo .icon {
+  flex-shrink: 0;
+  font-size: 26px;
+  color: var(--color-primary);
+}
+
+.sidebar-logo:hover {
+  color: #fff;
+}
+
+.sidebar-collapse-btn {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.6);
+  transition: all 0.3s ease;
+}
+
+.sidebar-collapse-btn:hover {
+  background-color: var(--sidebar-hover-bg);
+  color: #fff;
+}
+
+.sidebar-collapse-btn .icon-expand {
+  display: none;
+}
+
+html.sidebar-collapsed .sidebar-collapse-btn .icon-contract {
+  display: none;
+}
+
+html.sidebar-collapsed .sidebar-collapse-btn .icon-expand {
+  display: inline-block;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  margin-top: 8px;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  color: var(--sidebar-text);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.sidebar-link .icon {
+  flex-shrink: 0;
+  font-size: 26px;
+  color: #fff;
+}
+
+.sidebar-link:hover {
+  background-color: var(--sidebar-hover-bg);
+  color: #fff;
+  transform: translateX(2px);
+}
+
+.sidebar-link.is-active {
+  background-color: var(--color-primary);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(var(--color-primary-rgb), 0.35);
+}
+
+.sidebar-link.is-active:hover {
+  transform: none;
+}
+
+.sidebar-link-text,
+.sidebar-logo-text {
+  transition: opacity 0.2s ease;
+}
+
+html.sidebar-collapsed .sidebar-link-text,
+html.sidebar-collapsed .sidebar-logo-text,
+html.sidebar-collapsed .sidebar-user-name {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+}
+
+html.sidebar-collapsed .sidebar-link {
+  justify-content: center;
+  padding: 12px;
+}
+
+html.sidebar-collapsed .sidebar-user {
+  justify-content: center;
+}
+
+.sidebar-footer {
+  border-top: 1px solid var(--sidebar-border);
+  padding-top: 12px;
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  color: #fff;
+  transition: all 0.3s ease;
+}
+
+.sidebar-user:hover {
+  background-color: var(--sidebar-hover-bg);
+}
+
+.sidebar-user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  font-size: 0.95rem;
+  object-fit: cover;
+}
+
+.sidebar-user-avatar-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 22px;
+}
+
+.sidebar-logout {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.sidebar-logout:hover {
+  color: #fff;
+  background-color: rgba(192, 57, 43, 0.2);
+}
+
+/* ---- Mobile off-canvas sidebar ---------------------------------------------- */
+.sidebar-mobile-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.45);
+  z-index: 1150;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.sidebar-mobile-backdrop.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.sidebar-mobile-toggle {
+  display: none;
+  width: 36px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text);
+}
+
+/* ---- Main content area ------------------------------------------------------ */
+.dashboard-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 32px;
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  transition: background-color 0.3s ease;
+}
+
+.dashboard-header-title {
+  font-size: 1.6rem;
+}
+
+.dashboard-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dashboard-theme-toggle {
+  background-color: #3a3f47;
+  color: #fff;
+}
+
+.dashboard-logout-btn {
+  background-color: #eef0f2;
+  color: #3a3f47;
+  font-size: 22px;
+}
+
+.dashboard-logout-btn:hover {
+  background-color: #3a3f47;
+  color: #fff;
+  transform: translateY(-2px) scale(1.05);
+}
+
+.dashboard-content {
+  padding: 32px;
+  flex: 1;
+}
+
+@media (max-width: 960px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    transform: translateX(-100%);
+    width: var(--sidebar-width) !important;
+  }
+
+  .sidebar.is-mobile-open {
+    transform: translateX(0);
+  }
+
+  .sidebar-collapse-btn {
+    display: none;
+  }
+
+  .sidebar-mobile-toggle {
+    display: flex;
+  }
+
+  /* The desktop "collapsed to icons" state is meaningless for an off-canvas
+     drawer that's already fully hidden/shown — always render it expanded. */
+  html.sidebar-collapsed .sidebar-header {
+    flex-direction: row;
+    padding: 4px 8px 24px;
+  }
+
+  html.sidebar-collapsed .sidebar-link-text,
+  html.sidebar-collapsed .sidebar-logo-text,
+  html.sidebar-collapsed .sidebar-user-name {
+    opacity: 1;
+    width: auto;
+  }
+
+  html.sidebar-collapsed .sidebar-link,
+  html.sidebar-collapsed .sidebar-user {
+    justify-content: flex-start;
+    padding: 12px 14px;
+  }
+
+  .dashboard-header {
+    padding: 16px 20px;
+  }
+
+  .dashboard-content {
+    padding: 20px;
+  }
+}
+
+/* ---- Stat cards --------------------------------------------------------------- */
+.dashboard-stats {
+  margin-bottom: 28px;
+}
+
+.dashboard-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.dashboard-stat-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+}
+
+.dashboard-stat-value {
+  display: block;
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+.dashboard-stat-label {
+  display: block;
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+}
+
+.dashboard-section-title {
+  margin-bottom: 16px;
+}
+
+.dashboard-empty-text {
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: 32px 20px;
+}
+
+/* ---- Status indicator (not a badge: plain text + a small dot) ---------------- */
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.status-processed {
+  background-color: var(--color-primary);
+}
+
+.status-pending {
+  background-color: #d98c1f;
+}
+
+/* ---- Table thumbnails ---------------------------------------------------------- */
+.table-thumb {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+/* ---- Row actions (delete) -------------------------------------------------------- */
+.table-actions-col {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.delete-result-form {
+  display: flex;
+}
+
+.delete-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  background-color: transparent;
+  font-size: 18px;
+  transition: all 0.2s ease;
+}
+
+.delete-btn:hover {
+  color: #c0392b;
+  background-color: rgba(192, 57, 43, 0.12);
+}
+
+/* ---- Pagination controls -------------------------------------------------------- */
+.pagination-info {
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+}
+
+.pagination-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.pagination-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary);
+  background-color: var(--color-primary-soft);
+  transition: all 0.3s ease;
+}
+
+.pagination-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card);
+}
+
+.pagination-btn.is-disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* ---- Profile page ----------------------------------------------------------------- */
+.profile-card {
+  max-width: 480px;
+  text-align: center;
+  padding: 44px;
+  margin-bottom: 28px;
+}
+
+.profile-form-card {
+  max-width: 720px;
+}
+
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.profile-current-password-group {
+  max-width: 340px;
+}
+
+.profile-avatar {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-inline: auto;
+  margin-bottom: 20px;
+  font-size: 1.8rem;
+}
+
+.avatar-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-primary-soft);
+  color: #3a3f47;
+  font-size: 48px;
+}
+
+.avatar-icon .icon {
+  width: 1em;
+  height: 1em;
+}
+
+.profile-role {
+  color: var(--color-primary);
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.profile-details {
+  margin-top: 28px;
+  text-align: left;
+  border-top: 1px solid var(--color-border);
+  padding-top: 24px;
+}
+
+.profile-detail-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-block: 10px;
+  gap: 12px;
+}
+
+.profile-detail-row dt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-text-muted);
+}
+
+.profile-detail-row dd {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   Data visualization (dashboard home)
+   Categorical + status tokens per the validated dataviz reference palette —
+   swapped for dark mode via the app's existing [data-theme] mechanism.
+   ========================================================================== */
+
+.viz-root {
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --series-4: #eda100;
+  --status-good: #0ca30c;
+  --status-warning: #fab219;
+}
+
+[data-theme='dark'] .viz-root {
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+  --series-4: #c98500;
+}
+
+.dashboard-viz-row {
+  margin-bottom: 28px;
+  align-items: stretch;
+}
+
+/* ---- Donut chart ------------------------------------------------------------- */
+.donut-wrap {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+
+.donut-chart {
+  width: 180px;
+  height: 180px;
+  flex-shrink: 0;
+}
+
+.donut-track {
+  fill: none;
+  stroke: var(--color-border);
+}
+
+.donut-segment {
+  fill: none;
+  stroke-linecap: butt;
+  transition: stroke-width 0.3s ease, filter 0.3s ease;
+  cursor: pointer;
+}
+
+.donut-segment:hover {
+  stroke-width: 24;
+  filter: brightness(1.08);
+}
+
+.donut-slot-1 { stroke: var(--series-1); }
+.donut-slot-2 { stroke: var(--series-2); }
+.donut-slot-3 { stroke: var(--series-3); }
+.donut-slot-4 { stroke: var(--series-4); }
+
+.donut-label {
+  font-size: 10px;
+  font-weight: 700;
+  fill: var(--color-text-muted);
+}
+
+.donut-center-value {
+  font-size: 26px;
+  font-weight: 800;
+  fill: var(--color-text);
+}
+
+.donut-center-label {
+  font-size: 9px;
+  fill: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ---- Shared legend ------------------------------------------------------------ */
+.viz-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+  min-width: 160px;
+}
+
+.viz-legend li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1rem;
+}
+
+.legend-swatch {
+  width: 11px;
+  height: 11px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.legend-swatch.donut-slot-1 { background-color: var(--series-1); }
+.legend-swatch.donut-slot-2 { background-color: var(--series-2); }
+.legend-swatch.donut-slot-3 { background-color: var(--series-3); }
+.legend-swatch.donut-slot-4 { background-color: var(--series-4); }
+.legend-swatch.status-swatch-good { background-color: var(--status-good); }
+.legend-swatch.status-swatch-warning { background-color: var(--status-warning); }
+
+.legend-label {
+  color: var(--color-text);
+  font-weight: 600;
+  flex: 1;
+}
+
+.legend-value {
+  color: var(--color-text-muted);
+}
+
+/* ---- Status split bar ---------------------------------------------------------- */
+.status-bar-track {
+  display: flex;
+  height: 22px;
+  border-radius: 11px;
+  overflow: hidden;
+  background-color: var(--color-bg);
+  gap: 2px;
+  margin-bottom: 20px;
+}
+
+.status-bar-segment {
+  height: 100%;
+  transition: all 0.3s ease;
+}
+
+.status-bar-good {
+  background-color: var(--status-good);
+}
+
+.status-bar-warning {
+  background-color: var(--status-warning);
+}
+
+.status-legend {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+/* ---- Recent activity list (not a table) ----------------------------------------- */
+.activity-card {
+  padding: 8px 24px;
+}
+
+.activity-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.activity-item:last-child {
+  border-bottom: none;
+}
+
+.activity-item .status-dot {
+  margin-right: 0;
+  flex-shrink: 0;
+}
+
+.activity-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.activity-title {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.activity-meta {
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+}
+
+.activity-date {
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+  flex-shrink: 0;
+}
+
+@media (max-width: 700px) {
+  .donut-wrap {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .viz-legend {
+    width: 100%;
+  }
+}
+
+/* ==========================================================================
+   MRI scan upload (Scans page)
+   ========================================================================== */
+
+.upload-card {
+  margin-bottom: 28px;
+}
+
+.upload-card-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.upload-card-title-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  font-size: 34px;
+}
+
+.upload-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.upload-form-subheading {
+  font-size: 1.15rem;
+  color: var(--color-text);
+  padding-top: 4px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.required-mark {
+  color: var(--color-danger);
+  font-weight: 700;
+}
+
+.patient-fields-grid {
+  margin-bottom: 4px;
+}
+
+.patient-address-group {
+  grid-column: 1 / -1;
+}
+
+/* Narrower, gray-bordered, more elevated than a plain card — reads as a
+   distinct drop target rather than another full-width form row. */
+.dropzone {
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: 380px;
+  margin-inline: auto;
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 28px 20px;
+  text-align: center;
+  cursor: pointer;
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  transition: all 0.3s ease;
+}
+
+.dropzone:hover,
+.dropzone.is-dragover {
+  border-color: var(--color-text-muted);
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-2px);
+}
+
+.dropzone-input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 1;
+}
+
+/* [hidden] must win over the layout display below it, or the browser's
+   built-in "hidden = display:none" default gets silently overridden. */
+.dropzone-content[hidden],
+.dropzone-preview[hidden],
+.dropzone-scanning[hidden] {
+  display: none;
+}
+
+.dropzone-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.dropzone-icon {
+  font-size: 36px;
+  color: var(--color-text-muted);
+}
+
+.dropzone-title {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.dropzone-hint {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+/* Selected-file preview: a large centered thumbnail so the doctor can
+   actually verify the correct scan was chosen before analyzing. */
+.dropzone-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.dropzone-preview img {
+  width: 100%;
+  max-width: 260px;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  flex-shrink: 0;
+}
+
+.dropzone-preview-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  max-width: 100%;
+}
+
+.dropzone-filename {
+  color: var(--color-text);
+  font-weight: 600;
+  word-break: break-all;
+}
+
+.dropzone-clear {
+  position: relative;
+  z-index: 2;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--color-text-muted);
+  transition: all 0.3s ease;
+}
+
+.dropzone-clear:hover {
+  color: var(--color-danger);
+  background-color: var(--color-danger-soft);
+}
+
+/* Scanning overlay: replaces the dropzone content while the model runs. */
+.dropzone-scanning {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 0;
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.dropzone-scanning-spinner {
+  font-size: 32px;
+  color: var(--color-primary);
+  animation: dropzone-spin 1s linear infinite;
+}
+
+.upload-submit-row {
+  display: flex;
+  justify-content: center;
+  padding-top: 8px;
+}
+
+.upload-submit-btn {
+  padding: 13px 36px;
+  font-size: 1.05rem;
+}
+
+.upload-submit-btn:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+@keyframes dropzone-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ---- Latest scan result card -------------------------------------------------- */
+.result-card {
+  margin-top: 28px;
+}
+
+.result-layout {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.result-image {
+  width: 220px;
+  height: 220px;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  flex-shrink: 0;
+}
+
+.result-details {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 240px;
+}
+
+.result-patient-name {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.result-patient-meta {
+  color: var(--color-text-muted);
+  margin-bottom: 16px;
+}
+
+/* Neutral container; the icon badge alone carries the status color — reads
+   as a calm clinical summary rather than a loud alert banner. */
+.result-outcome {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg);
+  margin-bottom: 12px;
+}
+
+.result-outcome-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  font-size: 22px;
+}
+
+.result-outcome-title {
+  display: block;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.result-outcome-confidence {
+  display: block;
+  font-size: 0.92rem;
+  color: var(--color-text-muted);
+}
+
+.result-outcome-clear .result-outcome-icon {
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.result-outcome-alert .result-outcome-icon {
+  background-color: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+.result-outcome-pending .result-outcome-icon {
+  background-color: var(--color-primary-soft);
+  color: var(--color-text-muted);
+}
+
+.result-sequence {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 16px;
+}
+
+.result-sequence .icon {
+  color: var(--color-primary);
+  font-size: 18px;
+}
+
+.result-sequence strong {
+  color: var(--color-text);
+}
+
+.result-sequence em {
+  font-style: normal;
+  opacity: 0.75;
+}
+
+.result-view-link {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (max-width: 600px) {
+  .dropzone-preview-info {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .result-layout {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .result-image {
+    width: 100%;
+    max-width: 260px;
+  }
+
+  .result-view-link {
+    align-self: center;
+  }
+}

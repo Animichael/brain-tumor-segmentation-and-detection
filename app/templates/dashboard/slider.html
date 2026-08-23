@@ -1,0 +1,41 @@
+{% extends "dashboard/base_dashboard.html" %}
+
+{% block dashboard_title %}Hero Slider{% endblock %}
+
+{% block dashboard_content %}
+<div class="table-wrapper">
+    <table>
+        <thead>
+            <tr>
+                <th>Image</th>
+                <th>Title</th>
+                <th>Subtitle</th>
+                <th>Order</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for slide in pagination.items %}
+            <tr>
+                <td>
+                    <img class="table-thumb" alt="{{ slide.title }}"
+                         src="{{ url_for('static', filename='uploads/slider/' ~ slide.image_filename) }}">
+                </td>
+                <td>{{ slide.title }}</td>
+                <td>{{ slide.subtitle or '—' }}</td>
+                <td>{{ slide.sort_order }}</td>
+                <td>
+                    <span class="status-dot {{ 'status-processed' if slide.is_active else 'status-pending' }}"></span>
+                    {{ 'Active' if slide.is_active else 'Hidden' }}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" class="dashboard-empty-text">No slides yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% include "dashboard/_pagination.html" %}
+</div>
+{% endblock %}

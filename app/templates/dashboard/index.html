@@ -1,0 +1,125 @@
+{% extends "dashboard/base_dashboard.html" %}
+
+{% block dashboard_title %}Dashboard{% endblock %}
+
+{% block dashboard_content %}
+<div class="grid grid-cols-4 dashboard-stats">
+    <div class="card dashboard-stat-card">
+        <div class="dashboard-stat-icon">{{ icon('patient-24-regular') }}</div>
+        <div>
+            <span class="dashboard-stat-value">{{ stats.patients }}</span>
+            <span class="dashboard-stat-label">Patients</span>
+        </div>
+    </div>
+    <div class="card dashboard-stat-card">
+        <div class="dashboard-stat-icon">{{ icon('scan-24-regular') }}</div>
+        <div>
+            <span class="dashboard-stat-value">{{ stats.scans }}</span>
+            <span class="dashboard-stat-label">Total Scans</span>
+        </div>
+    </div>
+    <div class="card dashboard-stat-card">
+        <div class="dashboard-stat-icon">{{ icon('checkmark-circle-24-regular') }}</div>
+        <div>
+            <span class="dashboard-stat-value">{{ stats.processed }}</span>
+            <span class="dashboard-stat-label">Processed</span>
+        </div>
+    </div>
+    <div class="card dashboard-stat-card">
+        <div class="dashboard-stat-icon">{{ icon('clipboard-pulse-24-regular') }}</div>
+        <div>
+            <span class="dashboard-stat-value">{{ stats.predictions }}</span>
+            <span class="dashboard-stat-label">Predictions</span>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-2 dashboard-viz-row">
+    <div class="card viz-root">
+        <h3 class="dashboard-section-title">Classification Breakdown</h3>
+        {% if donut.total %}
+        <div class="donut-wrap">
+            <svg class="donut-chart" viewBox="0 0 180 180" role="img" aria-label="Predictions by classification">
+                <circle class="donut-track" cx="{{ donut.center }}" cy="{{ donut.center }}" r="{{ donut.radius }}" stroke-width="{{ donut.stroke }}" />
+                <g transform="rotate(-90 {{ donut.center }} {{ donut.center }})">
+                    {% for seg in donut.segments %}
+                    <circle
+                        class="donut-segment donut-slot-{{ seg.slot }}"
+                        cx="{{ donut.center }}" cy="{{ donut.center }}" r="{{ donut.radius }}"
+                        stroke-width="{{ donut.stroke }}"
+                        stroke-dasharray="{{ seg.dasharray }}"
+                        stroke-dashoffset="{{ seg.dashoffset }}">
+                        <title>{{ seg.label }}: {{ seg.count }} ({{ seg.percent }}%)</title>
+                    </circle>
+                    {% endfor %}
+                </g>
+                {% for seg in donut.segments %}
+                <text x="{{ seg.label_x }}" y="{{ seg.label_y }}" class="donut-label" text-anchor="middle" dominant-baseline="middle">{{ seg.percent }}%</text>
+                {% endfor %}
+                <text x="{{ donut.center }}" y="{{ donut.center - 4 }}" class="donut-center-value" text-anchor="middle">{{ donut.total }}</text>
+                <text x="{{ donut.center }}" y="{{ donut.center + 16 }}" class="donut-center-label" text-anchor="middle">Predictions</text>
+            </svg>
+            <ul class="viz-legend">
+                {% for seg in donut.segments %}
+                <li>
+                    <span class="legend-swatch donut-slot-{{ seg.slot }}"></span>
+                    <span class="legend-label">{{ seg.label }}</span>
+                    <span class="legend-value">{{ seg.count }} · {{ seg.percent }}%</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% else %}
+        <p class="dashboard-empty-text">No predictions yet.</p>
+        {% endif %}
+    </div>
+
+    <div class="card viz-root">
+        <h3 class="dashboard-section-title">Scan Status</h3>
+        {% if status_split.total %}
+        <div class="status-bar-track">
+            <div class="status-bar-segment status-bar-good" style="width: {{ status_split.processed_percent }}%;"
+                 title="Processed: {{ status_split.processed }} ({{ status_split.processed_percent }}%)"></div>
+            <div class="status-bar-segment status-bar-warning" style="width: {{ status_split.pending_percent }}%;"
+                 title="Pending: {{ status_split.pending }} ({{ status_split.pending_percent }}%)"></div>
+        </div>
+        <ul class="viz-legend status-legend">
+            <li>
+                <span class="legend-swatch status-swatch-good"></span>
+                <span class="legend-label">Processed</span>
+                <span class="legend-value">{{ status_split.processed }} · {{ status_split.processed_percent }}%</span>
+            </li>
+            <li>
+                <span class="legend-swatch status-swatch-warning"></span>
+                <span class="legend-label">Pending</span>
+                <span class="legend-value">{{ status_split.pending }} · {{ status_split.pending_percent }}%</span>
+            </li>
+        </ul>
+        {% else %}
+        <p class="dashboard-empty-text">No scans yet.</p>
+        {% endif %}
+    </div>
+</div>
+
+<h3 class="dashboard-section-title">Recent Activity</h3>
+{% if recent_scans %}
+<div class="card activity-card">
+    <ul class="activity-list">
+        {% for scan in recent_scans %}
+        <li class="activity-item">
+            <span class="status-dot status-{{ scan.status }}"></span>
+            <div class="activity-main">
+                <span class="activity-title">{{ scan.patient.name }}</span>
+                <span class="activity-meta">{{ scan.prediction.classification if scan.prediction else 'Awaiting review' }}</span>
+            </div>
+            <span class="activity-date">{{ scan.created_at.strftime('%b %d, %Y') }}</span>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% else %}
+<div class="card">
+    <p class="dashboard-empty-text">No scans yet.</p>
+</div>
+{% endif %}
+{% endblock %}

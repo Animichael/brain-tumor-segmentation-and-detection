@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <aside class="sidebar" id="dashboard-sidebar">
+        <div class="sidebar-header">
+            <a href="{{ url_for('dashboard.index') }}" class="sidebar-logo">
+                {{ icon('brain-circuit-24-filled') }}
+                <span class="sidebar-logo-text">NeuroScan <strong>AI</strong></span>
+            </a>
+            <button class="sidebar-collapse-btn" id="sidebar-collapse-btn" aria-label="Collapse sidebar">
+                {{ icon('panel-left-contract-24-regular', 'icon-contract') }}
+                {{ icon('panel-left-expand-24-regular', 'icon-expand') }}
+            </button>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('dashboard.index') }}"
+               class="sidebar-link {% if request.endpoint == 'dashboard.index' %}is-active{% endif %}">
+                {{ icon('home-24-filled' if request.endpoint == 'dashboard.index' else 'home-24-regular') }}
+                <span class="sidebar-link-text">Dashboard</span>
+            </a>
+            <a href="{{ url_for('dashboard.scans') }}"
+               class="sidebar-link {% if request.endpoint == 'dashboard.scans' %}is-active{% endif %}">
+                {{ icon('scan-24-filled' if request.endpoint == 'dashboard.scans' else 'scan-24-regular') }}
+                <span class="sidebar-link-text">Scans</span>
+            </a>
+            <a href="{{ url_for('dashboard.results') }}"
+               class="sidebar-link {% if request.endpoint == 'dashboard.results' %}is-active{% endif %}">
+                {{ icon('clipboard-pulse-24-filled' if request.endpoint == 'dashboard.results' else 'clipboard-pulse-24-regular') }}
+                <span class="sidebar-link-text">Results</span>
+            </a>
+            {% if current_user.role == 'admin' %}
+            <a href="{{ url_for('dashboard.slider') }}"
+               class="sidebar-link {% if request.endpoint == 'dashboard.slider' %}is-active{% endif %}">
+                {{ icon('image-24-filled' if request.endpoint == 'dashboard.slider' else 'image-24-regular') }}
+                <span class="sidebar-link-text">Hero Slider</span>
+            </a>
+            {% endif %}
+            <a href="{{ url_for('dashboard.profile') }}"
+               class="sidebar-link {% if request.endpoint == 'dashboard.profile' %}is-active{% endif %}">
+                {{ icon('person-24-filled' if request.endpoint == 'dashboard.profile' else 'person-24-regular') }}
+                <span class="sidebar-link-text">Profile</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="{{ url_for('dashboard.profile') }}" class="sidebar-user">
+                {% if current_user.avatar %}
+                <img src="{{ url_for('static', filename=current_user.avatar) }}" alt="{{ current_user.full_name }}" class="sidebar-user-avatar">
+                {% else %}
+                <span class="sidebar-user-avatar sidebar-user-avatar-icon">{{ icon('person-circle-24-regular') }}</span>
+                {% endif %}
+                <span class="sidebar-link-text sidebar-user-name">{{ current_user.full_name }}</span>
+            </a>
+            <a href="{{ url_for('auth.logout') }}" class="sidebar-link sidebar-logout">
+                {{ icon('sign-out-24-regular') }}
+                <span class="sidebar-link-text">Logout</span>
+            </a>
+        </div>
+    </aside>
+
+    <div class="sidebar-mobile-backdrop" id="sidebar-mobile-backdrop"></div>
+
+    <div class="dashboard-main">
+        <header class="dashboard-header">
+            <button class="sidebar-mobile-toggle" id="sidebar-mobile-toggle" aria-label="Open menu">
+                {{ icon('line-horizontal-3-24-regular') }}
+            </button>
+            <h1 class="dashboard-header-title">{% block dashboard_title %}Dashboard{% endblock %}</h1>
+            <div class="dashboard-header-actions">
+                <a href="{{ url_for('auth.logout') }}" class="theme-toggle dashboard-logout-btn" aria-label="Logout">
+                    {{ icon('sign-out-24-regular') }}
+                </a>
+                <button data-theme-toggle class="theme-toggle dashboard-theme-toggle" aria-label="Toggle dark mode" aria-pressed="false">
+                    {{ icon('weather-sunny-20-regular', 'icon-sun') }}
+                    {{ icon('weather-moon-20-regular', 'icon-moon') }}
+                </button>
+            </div>
+        </header>
+
+        <div class="dashboard-content">
+            {% block dashboard_content %}{% endblock %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
