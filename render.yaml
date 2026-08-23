@@ -1,3 +1,7 @@
+# Optional: only used if you deploy via Render's "New > Blueprint" flow,
+# which provisions a paid web service plan + a paid disk. For the free-tier
+# manual setup this repo is actually deployed with, see DEPLOY.md instead —
+# this file isn't read at all in that path.
 services:
   - type: web
     name: neuroscan-ai

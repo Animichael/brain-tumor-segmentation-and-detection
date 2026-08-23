@@ -1,26 +1,17 @@
 #!/usr/bin/env bash
-# Render start command: puts uploaded scan/slider images and the
-# Hugging Face model cache on the attached persistent disk (so they survive
-# restarts and redeploys), then boots the app under gunicorn.
-#
-# Uploaded images are kept reachable at their normal app/static/uploads/ URL
-# by symlinking that path to the persistent disk — no route or template
-# changes needed.
+# Render start command for a plain (free-tier) Web Service — no persistent
+# disk attached. Uploaded scans, the SQLite DB (if used), and the Hugging
+# Face model cache all live on the service's own ephemeral filesystem, which
+# is reset on every restart/redeploy. If you later attach a paid disk, point
+# RENDER_DISK_PATH at its mount path to make these persist instead.
 set -euo pipefail
 
-DATA_DIR="${RENDER_DISK_PATH:-/var/data}"
+mkdir -p app/static/uploads/scans app/static/uploads/slider
 
-mkdir -p "$DATA_DIR/uploads/scans" "$DATA_DIR/uploads/slider" "$DATA_DIR/hf-cache"
-
-if [ ! -L app/static/uploads ]; then
-    # First boot on this disk: seed it with whatever shipped in the repo
-    # (sample MRIs, hero slider photos) before switching to the symlink.
-    cp -rn app/static/uploads/. "$DATA_DIR/uploads/" 2>/dev/null || true
-    rm -rf app/static/uploads
-    ln -s "$DATA_DIR/uploads" app/static/uploads
+if [ -n "${RENDER_DISK_PATH:-}" ]; then
+    mkdir -p "$RENDER_DISK_PATH/hf-cache"
+    export HF_HOME="$RENDER_DISK_PATH/hf-cache"
 fi
-
-export HF_HOME="$DATA_DIR/hf-cache"
 
 exec gunicorn run:app \
     --bind "0.0.0.0:${PORT:-10000}" \

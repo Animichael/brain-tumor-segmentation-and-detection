@@ -299,14 +299,15 @@ Visit `http://127.0.0.1:5000` (or whichever port you choose with `--port`). The 
 
 ## Deployment
 
-This repo is set up for one-step deployment to [Render](https://render.com/) via `render.yaml` — a Blueprint that provisions the web service, a managed PostgreSQL database, and a persistent disk (for uploaded images and cached model weights) together.
+This repo is deployed to [Render](https://render.com/) as a free-tier Web Service, configured by hand (build command, start command, and env vars set directly in the Render dashboard).
 
 Full walkthrough: **[DEPLOY.md](DEPLOY.md)**.
 
 Key points:
-- Requires Render's **Standard** plan (not free/starter) — the classification and segmentation models need real memory once loaded.
+- Free plan has no persistent disk, so uploaded scans and the SQLite database reset on every restart/redeploy unless you additionally wire up a free Postgres database for the DB (see DEPLOY.md) — uploaded images stay ephemeral regardless.
+- torch + transformers + ultralytics need real memory once loaded; 512MB (the free plan's RAM) may not be enough, in which case the fix is a paid plan with more RAM.
 - A single Gunicorn worker is used intentionally, since each worker loads its own copy of the models into memory.
-- Uploaded scans and downloaded model weights are kept on Render's persistent disk, so they survive restarts and redeploys.
+- A paid Blueprint path (`render.yaml`) also exists for a fully persistent setup (disk + managed Postgres), documented as an alternative in DEPLOY.md.
 
 ---
 
