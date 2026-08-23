@@ -29,14 +29,15 @@ OVERLAY_COLOR = np.array([220, 38, 38])  # matches the app's --color-danger red
 OVERLAY_ALPHA = 0.45
 
 # Calibrated against this app's own sample scans vs. its stock photos (see
-# is_likely_mri): real MRI slices scored under 6, ordinary photos over 20.
-MRI_COLOR_SPREAD_THRESHOLD = 12.0
+# is_likely_mri): real MRI slices - including a sepia/warm-tinted one, the
+# case that motivated this metric - scored at least 0.90; ordinary photos
+# topped out at 0.62. Wide margin either side of the threshold below.
+MRI_BORDER_UNIFORMITY_THRESHOLD = 0.75
 
 # Real MRI slices never have much near-white area (max seen: 1.3%) - even a
 # scan with almost no black background is still mid-gray tissue, not flat
 # white. UI screenshots and documents are the opposite: mostly white page/
-# background. This is what actually catches those, since a screenshot can
-# still look "grayscale" overall and slip past the color-spread check alone.
+# background.
 MRI_LIGHT_FRACTION_THRESHOLD = 0.3
 
 _classifier = None
@@ -65,44 +66,72 @@ def _get_segmenter():
     return _segmenter
 
 
+def _border_uniformity(gray_pixels):
+    """Fraction of the image's outer border that clusters around a single
+    dominant gray value.
+
+    A scan image - MRI, CT, PET, any tint or color-mapping included - is a
+    roughly circular/oval cross-section on a plain background that doesn't
+    fill the rectangular frame, so its border is overwhelmingly one value
+    (almost always black). An ordinary photo of a room, a person, or
+    equipment has real content running edge to edge, so its border is a mix
+    of many different values. This holds regardless of color tint, which is
+    what makes it more reliable than checking color directly: a sepia-toned
+    scan of old film still has a uniform border once converted to grayscale,
+    even though its color channels alone look nothing like a neutral image.
+    """
+    height, width = gray_pixels.shape
+    border_width = max(int(min(height, width) * 0.06), 3)
+    border = np.concatenate(
+        [
+            gray_pixels[:border_width, :].ravel(),
+            gray_pixels[-border_width:, :].ravel(),
+            gray_pixels[:, :border_width].ravel(),
+            gray_pixels[:, -border_width:].ravel(),
+        ]
+    )
+    hist, edges = np.histogram(border, bins=32, range=(0, 255))
+    mode_value = (edges[np.argmax(hist)] + edges[np.argmax(hist) + 1]) / 2
+    return float((np.abs(border - mode_value) < 20).mean())
+
+
 def is_likely_mri(image_path):
     """Coarse screen for "is this even an MRI-style scan," run before the
     classifier so an obviously-wrong upload gets a clear message instead of a
     confident-looking but meaningless prediction.
 
-    Two checks, both grounded in how MRI slices actually look once exported
-    to PNG/JPEG, run against this app's own sample scans and stock photos to
-    pick thresholds with a comfortable margin either side:
+    Two checks, both grounded in how scan images actually look once exported
+    to PNG/JPEG, calibrated against this app's own sample scans and stock
+    photos with a comfortable margin either side:
 
-    1. Color. MRI carries no color channel, so R, G and B come out nearly
-       identical at every pixel (aside from a little JPEG chroma noise).
-       Real slices scored under 6 on the per-pixel |R-G|+|G-B|+|R-B|
-       average; ordinary color photos started above 20.
+    1. Border uniformity - see _border_uniformity. Real scans scored at
+       least 0.90 here; ordinary photos topped out at 0.62. An earlier
+       version of this check looked at color instead (MRI has no color
+       channel) and rejected a real, legitimate scan that happened to be a
+       sepia-toned scan of old film - color varies too much across
+       legitimately-valid scans (tinted film, PET/SPECT color mapping) to be
+       a safe signal. Border shape doesn't have that problem.
     2. Near-white area. A flat white background is essentially never part of
-       a real MRI slice - even one with almost no black margin is still
-       mid-gray tissue, not white. Real slices had at most 1.3% near-white
-       pixels; a screenshot of this app's own light-themed UI had 78%. This
-       is what catches screenshots and documents, which can still look
-       "grayscale" overall and slip past the color check alone.
+       a real scan - even one with almost no black margin is still mid-gray
+       tissue, not white. Real slices had at most 1.3% near-white pixels; a
+       screenshot of this app's own light-themed UI had 78%.
 
-    This is a coarse gate, not a trained classifier: it catches color photos,
+    This is a coarse gate, not a trained classifier: it catches photos,
     screenshots and documents, but can't catch a grayscale image of the
-    wrong subject (e.g. a chest X-ray), since nothing in the pixel data
-    alone distinguishes that from a valid brain slice.
+    wrong subject (e.g. a chest X-ray) framed the same way as a brain scan.
 
     Returns (True, None) if it passes, or (False, reason) if it doesn't.
     """
     image = Image.open(image_path).convert("RGB")
     pixels = np.array(image, dtype=np.float32)
-    r, g, b = pixels[..., 0], pixels[..., 1], pixels[..., 2]
-    channel_spread = float(np.mean(np.abs(r - g) + np.abs(g - b) + np.abs(r - b)))
-    if channel_spread > MRI_COLOR_SPREAD_THRESHOLD:
-        return False, "the image appears to be a color photo, not a grayscale MRI scan"
-
     gray = pixels.mean(axis=2)
+
     light_fraction = float((gray > 235).mean())
     if light_fraction > MRI_LIGHT_FRACTION_THRESHOLD:
         return False, "the image looks like a screenshot or document, not an MRI scan"
+
+    if _border_uniformity(gray) < MRI_BORDER_UNIFORMITY_THRESHOLD:
+        return False, "the image doesn't have the framing of an MRI scan (a scan region on a plain background)"
 
     return True, None
 
