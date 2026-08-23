@@ -29,8 +29,15 @@ OVERLAY_COLOR = np.array([220, 38, 38])  # matches the app's --color-danger red
 OVERLAY_ALPHA = 0.45
 
 # Calibrated against this app's own sample scans vs. its stock photos (see
-# is_likely_mri): real MRI slices scored under 3, ordinary photos over 20.
+# is_likely_mri): real MRI slices scored under 6, ordinary photos over 20.
 MRI_COLOR_SPREAD_THRESHOLD = 12.0
+
+# Real MRI slices never have much near-white area (max seen: 1.3%) - even a
+# scan with almost no black background is still mid-gray tissue, not flat
+# white. UI screenshots and documents are the opposite: mostly white page/
+# background. This is what actually catches those, since a screenshot can
+# still look "grayscale" overall and slip past the color-spread check alone.
+MRI_LIGHT_FRACTION_THRESHOLD = 0.3
 
 _classifier = None
 _segmenter = None
@@ -63,18 +70,25 @@ def is_likely_mri(image_path):
     classifier so an obviously-wrong upload gets a clear message instead of a
     confident-looking but meaningless prediction.
 
-    MRI slices carry no color channel, so once exported to PNG/JPEG they come
-    out with R, G and B nearly identical at every pixel (aside from a little
-    JPEG chroma-subsampling noise). An ordinary photo - a phone snapshot, a
-    screenshot, a document - almost never does. Checked against this app's
-    own sample scans and stock photos, real MRI slices scored under 3 on the
-    per-pixel |R-G|+|G-B|+|R-B| average; ordinary photos started above 20 -
-    a wide, comfortable gap either side of the threshold below.
+    Two checks, both grounded in how MRI slices actually look once exported
+    to PNG/JPEG, run against this app's own sample scans and stock photos to
+    pick thresholds with a comfortable margin either side:
 
-    This is a coarse gate, not a trained classifier: it catches color photos
-    and screenshots, but can't catch a grayscale image of the wrong subject
-    (e.g. a chest X-ray), since nothing in the pixel data alone distinguishes
-    that from a valid brain slice.
+    1. Color. MRI carries no color channel, so R, G and B come out nearly
+       identical at every pixel (aside from a little JPEG chroma noise).
+       Real slices scored under 6 on the per-pixel |R-G|+|G-B|+|R-B|
+       average; ordinary color photos started above 20.
+    2. Near-white area. A flat white background is essentially never part of
+       a real MRI slice - even one with almost no black margin is still
+       mid-gray tissue, not white. Real slices had at most 1.3% near-white
+       pixels; a screenshot of this app's own light-themed UI had 78%. This
+       is what catches screenshots and documents, which can still look
+       "grayscale" overall and slip past the color check alone.
+
+    This is a coarse gate, not a trained classifier: it catches color photos,
+    screenshots and documents, but can't catch a grayscale image of the
+    wrong subject (e.g. a chest X-ray), since nothing in the pixel data
+    alone distinguishes that from a valid brain slice.
 
     Returns (True, None) if it passes, or (False, reason) if it doesn't.
     """
@@ -82,10 +96,15 @@ def is_likely_mri(image_path):
     pixels = np.array(image, dtype=np.float32)
     r, g, b = pixels[..., 0], pixels[..., 1], pixels[..., 2]
     channel_spread = float(np.mean(np.abs(r - g) + np.abs(g - b) + np.abs(r - b)))
+    if channel_spread > MRI_COLOR_SPREAD_THRESHOLD:
+        return False, "the image appears to be a color photo, not a grayscale MRI scan"
 
-    if channel_spread <= MRI_COLOR_SPREAD_THRESHOLD:
-        return True, None
-    return False, "the image appears to be a color photo, not a grayscale MRI scan"
+    gray = pixels.mean(axis=2)
+    light_fraction = float((gray > 235).mean())
+    if light_fraction > MRI_LIGHT_FRACTION_THRESHOLD:
+        return False, "the image looks like a screenshot or document, not an MRI scan"
+
+    return True, None
 
 
 def classify_scan(image_path):
