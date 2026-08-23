@@ -16,7 +16,7 @@ services:
           name: neuroscan-ai-db
           property: connectionString
       - key: PYTHON_VERSION
-        value: 3.11.15
+        value: 3.11.9
       - key: RENDER_DISK_PATH
         value: /var/data
     disk:
