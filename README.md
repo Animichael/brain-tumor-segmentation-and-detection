@@ -3,8 +3,9 @@ title: NeuroScan AI
 emoji: 🧠
 colorFrom: indigo
 colorTo: purple
-sdk: docker
-app_port: 7860
+sdk: gradio
+sdk_version: 4.44.1
+app_file: gradio_app.py
 pinned: false
 ---
 
