@@ -1,0 +1,11 @@
+.git
+venv/
+.venv/
+__pycache__/
+**/__pycache__/
+*.pyc
+instance/
+*.db
+.DS_Store
+docs/screenshots/
+node_modules/
