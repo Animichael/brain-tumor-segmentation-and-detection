@@ -1,0 +1,58 @@
+{% extends "dashboard/base_dashboard.html" %}
+
+{% block dashboard_title %}Scan Result{% endblock %}
+
+{% block dashboard_content %}
+<div class="card result-card">
+    <h3 class="dashboard-section-title">Scan Result</h3>
+    <div class="result-layout">
+        <img class="result-image" src="{{ segmented_data_uri }}"
+             alt="Segmented scan for {{ patient.name }}">
+        <div class="result-details">
+            <span class="result-patient-name">{{ patient.name }}</span>
+            <span class="result-patient-meta">
+                {{ patient.age }} yrs · {{ patient.gender }}
+                {% if patient.phone %} · {{ patient.phone }}{% endif %}
+            </span>
+
+            {% set is_clear = result.classification == 'No Tumor' %}
+            <div class="result-outcome {{ 'result-outcome-clear' if is_clear else 'result-outcome-alert' }}">
+                <span class="result-outcome-icon">
+                    {{ icon('checkmark-circle-24-filled' if is_clear else 'error-circle-24-filled') }}
+                </span>
+                <div>
+                    <span class="result-outcome-title">
+                        {{ 'No Tumor Detected' if is_clear else result.classification + ' Detected' }}
+                    </span>
+                    <span class="result-outcome-confidence">
+                        {{ "%.0f"|format(result.confidence * 100) }}% confidence
+                    </span>
+                </div>
+            </div>
+
+            {% if result.tumor_area_percent %}
+            <div class="result-sequence">
+                {{ icon('ruler-24-regular') }}
+                <span>Tumor area: <strong>{{ result.tumor_area_percent }}%</strong> of the image</span>
+            </div>
+            {% endif %}
+
+            {% if result.sequence_type %}
+            <div class="result-sequence">
+                {{ icon('pulse-24-regular') }}
+                <span>Sequence: <strong>{{ result.sequence_type }}</strong> <em>(estimated)</em></span>
+            </div>
+            {% endif %}
+
+            <p class="upload-card-subtext" style="margin-top: 16px;">
+                This result is not saved. The uploaded image was processed in memory and discarded.
+            </p>
+
+            <a href="{{ url_for('dashboard.scans') }}" class="btn btn-primary result-view-link">
+                {{ icon('arrow-left-24-regular') }}
+                <span>Analyze another scan</span>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
